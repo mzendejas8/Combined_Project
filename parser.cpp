@@ -395,8 +395,15 @@ int main()
     int curr_st;
     
     
-   while(st.top()!=DOLL and input.front()!= '$')
+   while(st.top()!=DOLL)
     { 
+        if((st.top()==SEMI and input.front()!=';') or (st.top()==RP and input.front()!=')'))
+        {
+            cout << "ERROR MISSING SEMICOLON" << endl;
+            return 0;
+
+        }
+
         col = get_col(input.front());
         row = st.top();
       
