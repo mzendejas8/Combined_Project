@@ -12,7 +12,7 @@
 
 int main()
 {  
-    unordered_map< char,unordered_map<char,string>> ruleTable;
+    unordered_map< char,unordered_map<char,string> > ruleTable;
     vector <Tokens> vecTokens;
     Lex one;
     one.lexxer(vecTokens);
@@ -24,7 +24,17 @@ int main()
     char col;
     string prodRule;
     
-     
+     //Row S
+
+    ruleTable['S']['i']= "i=E;";
+    ruleTable['S']['+']= ", cant start at with +";
+    ruleTable['S']['-']= ", cant start at with -";
+    ruleTable['S']['*']= ", cant start at with *";
+    ruleTable['S']['/']= ", cant start at with /";
+    ruleTable['S']['(']= "ERROR ";
+    ruleTable['S'][')']= ", cant start at with )";
+    ruleTable['S']['n']= "ERROR";
+    ruleTable['S']['$']= "ERROR";
 
     
         //Row E T-> TQ
@@ -37,11 +47,14 @@ int main()
     ruleTable['E'][')']= ", cant start at with )";
     ruleTable['E']['n']= "TQ";
     ruleTable['E']['$']= "ERROR";
+    
         //Row Q Q-> +TQ
     ruleTable['Q']['+']= "+TQ";
     ruleTable['Q']['-']= "-TQ";
     ruleTable['Q'][')']= "epsilon";
     ruleTable['Q']['$']= "epsilon";
+    ruleTable['Q'][';']= "epsilon";
+
         //Row T T-> FR
     ruleTable['T']['i']= "FR";
     ruleTable['T']['(']= "FR";
@@ -53,6 +66,7 @@ int main()
     ruleTable['R']['/']="/FR";
     ruleTable['R'][')']= "epsilon"; 
     ruleTable['R']['$']= "epsilon";
+    ruleTable['R'][';']= "epsilon";
     
         //ROW F F- > i|(E)|n
     ruleTable['F']['i']= "i";
@@ -69,6 +83,7 @@ int main()
    for(int i = 0; i < vecTokens.size(); i++ )
    {
        input.push(vecTokens[i].chLex);
+       cout  <<vecTokens[i].chLex;
       
 
        
@@ -80,15 +95,17 @@ int main()
    
 
     st.push('$'); // $
-    st.push('E');  // S
+    st.push('S');  // S
     
     
     
-     cout << "Token:        Lexeme: "   << endl;
+     //cout << "Token:        Lexeme: "   << endl;
     int i = 1;
    while(st.top()!='$')
     {
-        
+        //cout << "Top of Stack: "<< st.top()<<" Front of Stack: "<< input.front() << endl;
+
+
         row = st.top();
         col = input.front();
         prodRule = ruleTable[row][col];
@@ -97,10 +114,36 @@ int main()
        
         if(st.top()== input.front())
         {
-            st.pop();
+            if(st.top()==';' and input.front()==';')
+            {
+                st.pop();
+                input.pop();
+                //we still have input.
+                if(input.front()!='$')
+                {
+                    st.push('S');
+
+                }
+                
+
+
+            }
+            else
+            {st.pop();
             input.pop();
-            cout << "Token:       Lexeme: "  << endl;
+            //cout << "Token:       Lexeme: "  << endl;
+            }
         }
+           else if(prodRule == "i=E;")
+            { 
+                st.pop();
+                st.push(';');
+                st.push('E');
+                st.push('=');
+                st.push('i');
+                cout << "    <Statement> -><Assign>\n";
+                cout <<"     Assign> -> <Identifier> = <Expression> ;\n";
+            }
 
         else
         {
@@ -231,7 +274,7 @@ int main()
   cout << "  \n";
     
 
-
+cout << "number of lines "<< line_number << endl;
 
 
 
