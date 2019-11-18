@@ -8,43 +8,36 @@
 #include<unordered_map>
 
 
-
-
-int main()
-{  
+string production_Rules(char row, char col)
+{   
     unordered_map< char,unordered_map<char,string> > ruleTable;
-    vector <Tokens> vecTokens;
-    Lex one;
-    one.lexxer(vecTokens);
     
-    stack <char> st;
-    queue <char> input;
-
-    char row;
-    char col;
-    string prodRule;
+       //Row S
+    ruleTable['S']['i']= "A";
+    ruleTable['S']['x']= "D";
+    ruleTable['S']['y']= "D";
+    ruleTable['S']['z']= "D";
     
-     //Row S
+        //Row A
+    ruleTable['A']['i']= "i=E;";
 
-    ruleTable['S']['i']= "i=E;";
-    ruleTable['S']['+']= ", cant start at with +";
-    ruleTable['S']['-']= ", cant start at with -";
-    ruleTable['S']['*']= ", cant start at with *";
-    ruleTable['S']['/']= ", cant start at with /";
-    ruleTable['S']['(']= "ERROR ";
-    ruleTable['S'][')']= ", cant start at with )";
-    ruleTable['S']['n']= "ERROR";
-    ruleTable['S']['$']= "ERROR";
+        //Row D D-> TidM;
+    ruleTable['D']['x']= "YiM;";
+    ruleTable['D']['y']= "YiM;";
+    ruleTable['D']['z']= "YiM;";
+    ruleTable['D']['$']="epsilon";
 
-    
+        //Row Y Y -> x|y|z
+    ruleTable['Y']['x']= "x";
+    ruleTable['Y']['y']= "y";
+    ruleTable['Y']['z']= "z";
+    ruleTable['Y']['i']= "epsilon";
+        //Row M M -> ,M
+    ruleTable['M'][',']= ",iM";
+    ruleTable['M'][';']= "epsilon";
         //Row E T-> TQ
     ruleTable['E']['i']= "TQ";
-    ruleTable['E']['+']= ", cant start at with +";
-    ruleTable['E']['-']= ", cant start at with -";
-    ruleTable['E']['*']= ", cant start at with *";
-    ruleTable['E']['/']= ", cant start at with /";
     ruleTable['E']['(']= "TQ";
-    ruleTable['E'][')']= ", cant start at with )";
     ruleTable['E']['n']= "TQ";
     ruleTable['E']['$']= "ERROR";
     
@@ -75,19 +68,39 @@ int main()
 
 
 
+    return ruleTable[row][col];
+}
 
-
+int main()
+{  
+    // vector of struct Token that will hold the tokens and lexemes.
+    vector <Tokens> vecTokens;
+    // Lexxer object to access lexical analyzer.
+    Lex one;
+    // passing the vector by referecen to get tokens and lexemes from lexical analyzer.
+    one.lexxer(vecTokens);
+    char row;
+    char col;
+    // stack that will be used to hold production rules.
+    stack <char> st;
+    // queue that will hold our input.
+    queue <char> input;
+    // string that will hold the current production rule.
+    string prodRule;
+    
+  
 
 
     
+
+    // Loop that accesses all the tokens from the vector and stores it in the queue in the form of char.
+    //i was used to represent  identifier.
+    //x, y , and z where used for int, float, bool in that order.
+    //operators and and separators are stored as is.
    for(int i = 0; i < vecTokens.size(); i++ )
    {
        input.push(vecTokens[i].chLex);
-       cout  <<vecTokens[i].chLex;
-      
-
-       
-
+       cout  <<vecTokens[i].chLex;  
    }
    cout << "\n";
     input.push('$');
@@ -96,24 +109,18 @@ int main()
 
     st.push('$'); // $
     st.push('S');  // S
-    
-    
-    
-     //cout << "Token:        Lexeme: "   << endl;
-    int i = 1;
+
    while(st.top()!='$')
     {
         //cout << "Top of Stack: "<< st.top()<<" Front of Stack: "<< input.front() << endl;
 
-
         row = st.top();
         col = input.front();
-        prodRule = ruleTable[row][col];
-        
-       
-       
+        prodRule = production_Rules(row,col);
+
         if(st.top()== input.front())
         {
+            //processes input after ;
             if(st.top()==';' and input.front()==';')
             {
                 st.pop();
@@ -122,18 +129,34 @@ int main()
                 if(input.front()!='$')
                 {
                     st.push('S');
-
                 }
-                
-
 
             }
             else
-            {st.pop();
+            {
+            st.pop();
             input.pop();
-            //cout << "Token:       Lexeme: "  << endl;
+            
             }
+               
         }
+        else
+        {
+
+           if(prodRule=="A")
+            {
+                st.pop();
+                st.push('A');
+               
+                cout << "      <Statement> -> <Assignment> \n";
+
+            }
+            else if(prodRule=="D")
+            {
+                st.pop();
+                st.push('D');
+                cout << "       <Statement> -> <Declerative> \n";
+            }
            else if(prodRule == "i=E;")
             { 
                 st.pop();
@@ -141,14 +164,10 @@ int main()
                 st.push('E');
                 st.push('=');
                 st.push('i');
-                cout << "    <Statement> -><Assign>\n";
+               
                 cout <<"     Assign> -> <Identifier> = <Expression> ;\n";
             }
-
-        else
-        {
-
-           if(prodRule == "TQ")
+           else if(prodRule == "TQ")
            {
                st.pop();
                st.push('Q');
@@ -162,17 +181,14 @@ int main()
                 st.push('T');
                 st.push('+');
                 cout<< "    <Exp Prime> -> + <Term><Exp Prime>\n";
-        
             }
              else if(prodRule == "-TQ")
             { 
-                
                 st.pop();
                 st.push('Q');
                 st.push('T');
                 st.push('-');
                 cout<< "    <Exp Prime> -> -<Term><Exp Prime>\n";
-        
             }
             else if(prodRule == "FR")
             {
@@ -180,7 +196,6 @@ int main()
                 st.push('R');
                 st.push('F');
                 cout << "     <Term> ->  <Factor><Term Prime>\n";
-
             }
             else if(prodRule == "*FR")
             { 
@@ -203,7 +218,6 @@ int main()
             { 
                 st.pop();
                 st.push('i');
-                
                 cout<< "     <Term> -> <Identifier>\n";
             }
 
@@ -222,6 +236,46 @@ int main()
                 
                 cout<< "      <Term> -> <number>\n";
             }
+            // Declarative Rules
+            else if(prodRule == "YiM;")
+            {
+                st.pop();
+                st.push(';');
+                st.push('M');
+                st.push('i');
+                st.push('Y');
+                cout  << "      <Declarative> -> <Type><Identifier><MoreIds>;\n";
+            }
+            else if(prodRule == "x")
+            {
+                st.pop();
+                st.push('x');
+                cout  << "      <Type> -> <int>      \n";
+            }
+            else if(prodRule == "y")
+            {
+                st.pop();
+                st.push('y');
+                cout  << "      <Type> -> <float>      \n";
+
+            }
+            else if(prodRule == "z")
+            {
+                st.pop();
+                st.push('z');
+                cout  << "      <Type> -> <bool>      \n";
+            }
+            else if(prodRule==",iM")
+            {
+                st.pop();
+                st.push('M');
+                st.push('i');
+                st.push(',');
+
+                cout << "          <MoreIds> -> ,<id><MoreIds> \n";
+
+            }
+
             else if(prodRule == "epsilon" )
             { 
                 
@@ -236,34 +290,36 @@ int main()
                         cout << "     <Term Prime> -> \u03B5 \n"  ;
 
                 }
+                else if (st.top() == 'D')
+                {
+                        cout << "     <Declerative> -> \u03B5 \n"  ;
+
+                }
+                else if (st.top() == 'Y')
+                {
+                        cout << "     <Type> -> \u03B5 \n"  ;
+
+                }
+                else if (st.top() == 'M')
+                {
+                        cout << "     <MoreIds> -> \u03B5 \n"  ;
+
+                }
                 st.pop();
             }
             
 
             else
             {
-                cout << "Error " <<prodRule << endl;
+                cout << "Error  at line: " << endl;
                 
                 return 0;
             }
             
-
-
-
-
-            
-            
         }
-        
-
-
-
+          
 
     }
-     
-
-       
-      
 
         
   if(st.top()== '$' and input.front() == '$')
@@ -274,7 +330,7 @@ int main()
   cout << "  \n";
     
 
-cout << "number of lines "<< line_number << endl;
+
 
 
 

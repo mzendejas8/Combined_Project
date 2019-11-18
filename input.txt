@@ -1,6 +1,4 @@
-x = a+b; 
-
-x= a+c;
+bool one,two;
 
 
-one = five/x;
+one = 12;

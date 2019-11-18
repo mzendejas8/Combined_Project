@@ -5,7 +5,7 @@
 #include <fstream>
 #include<vector>
 
-int line_number= 1;
+
 
 
 using namespace std;
@@ -31,7 +31,7 @@ struct Tokens{
     string tokens;
     string lexemes;
     char chLex;
-    int line_number_found = line_number;
+   
 };
 
 
@@ -84,10 +84,7 @@ int getCol(char x)
 // checks to see if the char is any type of white space 
     else if (x == '\t' or x =='\n' or x == ' ')
     {
-        if (x=='\n')
-        {
-            line_number++;
-        }
+       
         return 2;
     }
 //  switch statement used to check for operators and seperators
@@ -222,7 +219,12 @@ void lexxer(vector<Tokens> & vecTokens)
                             //cout    << "Keyword     =   " << str << endl;   
                             one.tokens = "Keyword";
                             one.lexemes = str;
-                            one.chLex= 'k';
+                            if(str == "int")
+                            {one.chLex= 'x';}
+                           else if(str == "float")
+                            {one.chLex= 'y';}
+                            else if(str == "bool")
+                            {one.chLex='z';}
                             vecTokens.push_back(one);   
                         }
                         else 
