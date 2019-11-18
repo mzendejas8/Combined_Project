@@ -1,4 +1,1 @@
-bool one,two;
-
-
-one = 12;
+if a > b then a=c else a endif;

@@ -17,16 +17,21 @@ string production_Rules(char row, char col)
     ruleTable['S']['x']= "D";
     ruleTable['S']['y']= "D";
     ruleTable['S']['z']= "D";
-    
+    ruleTable['S']['a']= "aCbScSd";
+    ruleTable['S']['e']= "eEfSg";
+    ruleTable['S']['h']= "hSWj";
+
+        //Row W
+    ruleTable['W']['$']= "epsilon";
+    ruleTable['W']['h']= "epsilon";
+    ruleTable['W'][';']= ";SW";
         //Row A
     ruleTable['A']['i']= "i=E;";
-
         //Row D D-> TidM;
     ruleTable['D']['x']= "YiM;";
     ruleTable['D']['y']= "YiM;";
     ruleTable['D']['z']= "YiM;";
     ruleTable['D']['$']="epsilon";
-
         //Row Y Y -> x|y|z
     ruleTable['Y']['x']= "x";
     ruleTable['Y']['y']= "y";
@@ -39,15 +44,19 @@ string production_Rules(char row, char col)
     ruleTable['E']['i']= "TQ";
     ruleTable['E']['(']= "TQ";
     ruleTable['E']['n']= "TQ";
-    ruleTable['E']['$']= "ERROR";
-    
+        //Row C
+    ruleTable['C']['i']= "ELE";
+    ruleTable['C']['(']= "ELE";
+    ruleTable['C']['n']= "ELE";
+        // Row C 
+    ruleTable['L']['>']= ">";
+    ruleTable['L']['<']= "<";
         //Row Q Q-> +TQ
     ruleTable['Q']['+']= "+TQ";
     ruleTable['Q']['-']= "-TQ";
     ruleTable['Q'][')']= "epsilon";
     ruleTable['Q']['$']= "epsilon";
     ruleTable['Q'][';']= "epsilon";
-
         //Row T T-> FR
     ruleTable['T']['i']= "FR";
     ruleTable['T']['(']= "FR";
@@ -60,11 +69,14 @@ string production_Rules(char row, char col)
     ruleTable['R'][')']= "epsilon"; 
     ruleTable['R']['$']= "epsilon";
     ruleTable['R'][';']= "epsilon";
-    
         //ROW F F- > i|(E)|n
     ruleTable['F']['i']= "i";
     ruleTable['F']['(']= "(E)";
     ruleTable['F']['n']= "n"; 
+
+//  experimental
+  
+
 
 
 
@@ -112,7 +124,7 @@ int main()
 
    while(st.top()!='$')
     {
-        //cout << "Top of Stack: "<< st.top()<<" Front of Stack: "<< input.front() << endl;
+        cout << "Top of Stack: "<< st.top()<<" Front of Stack: "<< input.front() << endl;
 
         row = st.top();
         col = input.front();
@@ -275,6 +287,87 @@ int main()
                 cout << "          <MoreIds> -> ,<id><MoreIds> \n";
 
             }
+            else if(prodRule=="aCbScSd")
+            {
+                st.pop();
+                st.push('d');
+                st.push('S');
+                st.push('c');
+                st.push('S');
+                st.push('b');
+                st.push('C');
+                st.push('a');
+
+                cout << "  <Statement >  -> if <Conditional> then <Statement> else <Statement> endif \n";
+
+            }
+             else if(prodRule=="eEfSg")
+            {
+                st.pop();
+                st.push('g');
+                st.push('S');
+                st.push('f');
+                st.push('E');
+                st.push('e');
+                
+
+                cout << "  <Statement >  -> while <Expression> do <Statement> whileend \n";
+
+
+            }
+             else if(prodRule=="hSWj")
+            {
+                st.pop();
+                st.push('j');
+                st.push('W');
+                st.push('S');
+                st.push('h');
+
+                cout << "  <Statement >  -> begin <Statement> <MoreStatements> end\n";
+
+
+            }
+
+            else if(prodRule==";SW")
+            {
+                st.pop();
+                st.push('W');
+                st.push('S');
+                st.push(';');
+                
+                cout << "  <More Statements>  -> ; <Statement> <MoreStatements>end\n";
+
+            }
+            else if(prodRule=="ELE")
+            {
+                st.pop();
+                st.push('E');
+                st.push('L');
+                st.push('E');
+                
+                cout << "  <Conditional>  -> <Expression> <Relop> <Expression>\n";
+
+
+            }
+            else if(prodRule==">")
+            {
+                st.pop();
+                st.push('>');
+                
+                cout << "  <Relop >  -> begin <Statement> <MoreStatements> end\n";
+
+
+            }
+             else if(prodRule=="<")
+            {
+                st.pop();
+                st.push('<');
+
+                cout << "  <Relop >  -> begin <Statement> <MoreStatements> end\n";
+
+
+            }
+
 
             else if(prodRule == "epsilon" )
             { 

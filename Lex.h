@@ -55,11 +55,11 @@ public:
 bool  isKeyword( string &str)
 {
 // stored all keywords in an array to for comparing.
-    string keywordCollec [18]={"int","float","bool","if", "else","then", "endif",
-    "while","whileend","do","doend","for","forend","input","output","and","or","function"};
+    string keywordCollec [20]={"int","float","bool","if", "else","then", "endif",
+    "while","whileend","do","doend","for","forend","input","output","and","or","function","begin","end"};
     bool flag=false;
 // compares the string passed to it to see if matching keyword is found.   
-    for(int i= 0; i<18 ; i++)
+    for(int i= 0; i<20 ; i++)
     {
         if(str == keywordCollec[i])
         {    
@@ -225,7 +225,27 @@ void lexxer(vector<Tokens> & vecTokens)
                             {one.chLex= 'y';}
                             else if(str == "bool")
                             {one.chLex='z';}
-                            vecTokens.push_back(one);   
+                            else if (str == "if")
+                            {one.chLex='a';}
+                            else if (str == "then")
+                            {one.chLex='b';}
+                            else if (str == "else")
+                            {one.chLex='c';}
+                            else if (str == "endif")
+                            {one.chLex='d';}
+                            else if (str == "while")
+                            {one.chLex='e';}
+                            else if (str == "do")
+                            {one.chLex='f';}
+                            else if (str == "whileend")
+                            {one.chLex='g';}
+                            else if (str == "begin")
+                            {one.chLex='h';}
+                            else if (str == "end")
+                            {one.chLex='j';}
+
+                            vecTokens.push_back(one);  
+                             
                         }
                         else 
                         {
