@@ -5,6 +5,7 @@
 #include <fstream>
 #include<vector>
 
+int line  = 1;
 
 
 
@@ -31,10 +32,9 @@ struct Tokens{
     string tokens;
     string lexemes;
     char chLex;
+    int line_found;
    
 };
-
-
 
 
 class Lex{
@@ -84,6 +84,10 @@ int getCol(char x)
 // checks to see if the char is any type of white space 
     else if (x == '\t' or x =='\n' or x == ' ')
     {
+        if(x=='\n'){
+        line++;
+        one.line_found=line;
+        }
        
         return 2;
     }
@@ -227,22 +231,11 @@ void lexxer(vector<Tokens> & vecTokens)
                             {one.chLex='z';}
                             else if (str == "if")
                             {one.chLex='a';}
-                            else if (str == "then")
+                            else if (str == "while")
                             {one.chLex='b';}
+                            // need to change
                             else if (str == "else")
                             {one.chLex='c';}
-                            else if (str == "endif")
-                            {one.chLex='d';}
-                            else if (str == "while")
-                            {one.chLex='e';}
-                            else if (str == "do")
-                            {one.chLex='f';}
-                            else if (str == "whileend")
-                            {one.chLex='g';}
-                            else if (str == "begin")
-                            {one.chLex='h';}
-                            else if (str == "end")
-                            {one.chLex='j';}
 
                             vecTokens.push_back(one);  
                              
@@ -254,8 +247,7 @@ void lexxer(vector<Tokens> & vecTokens)
                             one.lexemes = str;
                             one.chLex = 'i';
                             vecTokens.push_back(one); 
-                            
-                            
+     
                         }
                         str = "";
                         inFile.unget();

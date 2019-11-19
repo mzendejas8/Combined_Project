@@ -1,1 +1,3 @@
-if a > b then a=c else a endif;
+
+
+if(a<b){a=x;}else{b=y;}

@@ -6,27 +6,31 @@
 #include<vector>
 #include "Lex.h"
 #include<unordered_map>
+#include<map>
 
 
 string production_Rules(char row, char col)
 {   
-    unordered_map< char,unordered_map<char,string> > ruleTable;
+    map< char,map<char,string> > ruleTable;
     
        //Row S
     ruleTable['S']['i']= "A";
     ruleTable['S']['x']= "D";
     ruleTable['S']['y']= "D";
     ruleTable['S']['z']= "D";
-    ruleTable['S']['a']= "aCbScSd";
-    ruleTable['S']['e']= "eEfSg";
-    ruleTable['S']['h']= "hSWj";
+    ruleTable['S']['b']= "W";
+    ruleTable['S']['a'] = "I";
+    ruleTable['S']['}']= "epsilon";
+    ruleTable['S']['c'] ="epsilon";
+    
 
         //Row W
-    ruleTable['W']['$']= "epsilon";
-    ruleTable['W']['h']= "epsilon";
-    ruleTable['W'][';']= ";SW";
+    
+    ruleTable['W']['b']= "bE{S}";
+    
+    ruleTable['I']['a'] ="a(C){S}c{S}";
         //Row A
-    ruleTable['A']['i']= "i=E;";
+    ruleTable['A']['i']= "i=EN;";
         //Row D D-> TidM;
     ruleTable['D']['x']= "YiM;";
     ruleTable['D']['y']= "YiM;";
@@ -39,24 +43,23 @@ string production_Rules(char row, char col)
     ruleTable['Y']['i']= "epsilon";
         //Row M M -> ,M
     ruleTable['M'][',']= ",iM";
-    ruleTable['M'][';']= "epsilon";
+    ruleTable['M'][';']= ";iM";
         //Row E T-> TQ
     ruleTable['E']['i']= "TQ";
     ruleTable['E']['(']= "TQ";
     ruleTable['E']['n']= "TQ";
-        //Row C
-    ruleTable['C']['i']= "ELE";
-    ruleTable['C']['(']= "ELE";
-    ruleTable['C']['n']= "ELE";
-        // Row C 
-    ruleTable['L']['>']= ">";
     ruleTable['L']['<']= "<";
-        //Row Q Q-> +TQ
+    ruleTable['L']['>']= ">";
+
+   
+        //Row Q Q-> +TQ|-TQ
     ruleTable['Q']['+']= "+TQ";
     ruleTable['Q']['-']= "-TQ";
     ruleTable['Q'][')']= "epsilon";
     ruleTable['Q']['$']= "epsilon";
     ruleTable['Q'][';']= "epsilon";
+    ruleTable['Q']['>']= "epsilon";
+    ruleTable['Q']['<']= "epsilon";
         //Row T T-> FR
     ruleTable['T']['i']= "FR";
     ruleTable['T']['(']= "FR";
@@ -69,15 +72,16 @@ string production_Rules(char row, char col)
     ruleTable['R'][')']= "epsilon"; 
     ruleTable['R']['$']= "epsilon";
     ruleTable['R'][';']= "epsilon";
-        //ROW F F- > i|(E)|n
+    ruleTable['R']['>']= "epsilon";
+    ruleTable['R']['<']= "epsilon";
+    
+            //ROW F F- > i|(E)|n
     ruleTable['F']['i']= "i";
     ruleTable['F']['(']= "(E)";
     ruleTable['F']['n']= "n"; 
 
-//  experimental
-  
-
-
+    ruleTable['F']['n']= "n"; 
+    ruleTable['C']['i'] = "ELE";
 
 
     return ruleTable[row][col];
@@ -100,61 +104,68 @@ int main()
     // string that will hold the current production rule.
     string prodRule;
     
-  
-
-
-    
 
     // Loop that accesses all the tokens from the vector and stores it in the queue in the form of char.
     //i was used to represent  identifier.
     //x, y , and z where used for int, float, bool in that order.
-    //operators and and separators are stored as is.
+    
+   //vector iterator to access the lexeme, token and the line it was found on.
+    vector<Tokens>::iterator it = vecTokens.begin(); 
+   
    for(int i = 0; i < vecTokens.size(); i++ )
    {
        input.push(vecTokens[i].chLex);
-       cout  <<vecTokens[i].chLex;  
+     
    }
-   cout << "\n";
+   //add $ at the end of the input , it is used to symbolized the end of the queue
     input.push('$');
     
    
-
+    // initiate the stack by pushing the $ to symbolize the end of the stack. 
     st.push('$'); // $
+    //push the first rule for statement.
     st.push('S');  // S
-
+    
+    cout << "Token: " <<it ->tokens <<"     Lexeme: "<<it->lexemes<< "\n";
+        
    while(st.top()!='$')
     {
-        cout << "Top of Stack: "<< st.top()<<" Front of Stack: "<< input.front() << endl;
+        //cout << "Top of Stack: "<< st.top()<<" Front of Stack: "<< input.front() << endl;
 
         row = st.top();
         col = input.front();
         prodRule = production_Rules(row,col);
+        
 
         if(st.top()== input.front())
         {
-            //processes input after ;
-            if(st.top()==';' and input.front()==';')
+            //processes input after ; or after }
+            if((st.top()==';' and input.front()==';') or (st.top()=='}' and input.front()=='}'))
             {
                 st.pop();
                 input.pop();
                 //we still have input.
                 if(input.front()!='$')
-                {
+                {   // if there is input still there push S into the stack again.
                     st.push('S');
-                }
-
+                    
+                } 
             }
             else
             {
+            //if both the top of stack and front queue are eqaul pop both.
             st.pop();
             input.pop();
+            it++;
+            cout << "Token: " <<it ->tokens <<"     Lexeme: "<<it->lexemes<< "\n";
             
             }
-               
+
+              
         }
         else
         {
-
+            //S-> A
            if(prodRule=="A")
             {
                 st.pop();
@@ -163,13 +174,30 @@ int main()
                 cout << "      <Statement> -> <Assignment> \n";
 
             }
+            //S ->A
             else if(prodRule=="D")
             {
                 st.pop();
                 st.push('D');
                 cout << "       <Statement> -> <Declerative> \n";
             }
-           else if(prodRule == "i=E;")
+            //S->W
+            else if(prodRule=="W")
+            {
+                st.pop();
+                st.push('W');
+                cout << "<Statement> -> <WhileLoop>\n"; 
+
+            }
+            //S-> I
+            else if(prodRule=="I")
+            {
+                st.pop();
+                st.push('I');
+                cout <<  "<Statement> -> <If Statement>\n";
+            }
+            // A -> i=E;
+           else if(prodRule == "i=EN;")
             { 
                 st.pop();
                 st.push(';');
@@ -177,8 +205,9 @@ int main()
                 st.push('=');
                 st.push('i');
                
-                cout <<"     Assign> -> <Identifier> = <Expression> ;\n";
+                cout <<"     <Assign> -> <Identifier> = <Expression> ;\n";
             }
+            // E-> TQ
            else if(prodRule == "TQ")
            {
                st.pop();
@@ -186,6 +215,7 @@ int main()
                st.push('T');
                cout<< "     <Expression> -> <Term><Expression Prime>\n";
            }
+           // Q -> +TQ
           else if(prodRule == "+TQ")
             { 
                 st.pop();
@@ -194,6 +224,7 @@ int main()
                 st.push('+');
                 cout<< "    <Exp Prime> -> + <Term><Exp Prime>\n";
             }
+            // Q -> -TQ
              else if(prodRule == "-TQ")
             { 
                 st.pop();
@@ -202,6 +233,7 @@ int main()
                 st.push('-');
                 cout<< "    <Exp Prime> -> -<Term><Exp Prime>\n";
             }
+            //T -> FR
             else if(prodRule == "FR")
             {
                 st.pop();
@@ -209,6 +241,7 @@ int main()
                 st.push('F');
                 cout << "     <Term> ->  <Factor><Term Prime>\n";
             }
+            // T->*FR
             else if(prodRule == "*FR")
             { 
                 st.pop();
@@ -217,6 +250,7 @@ int main()
                 st.push('*');
                 cout<< "        <Term> -> *<Factor><Term Prime>\n";
             }
+            //T->/FR
              else if(prodRule == "/FR")
             { 
                 st.pop();
@@ -225,6 +259,7 @@ int main()
                 st.push('/');
                 cout<< "        <Term> -> *<Factor><Term Prime>\n";
             }
+            //T -> identifier
 
               else if(prodRule == "i")
             { 
@@ -232,6 +267,7 @@ int main()
                 st.push('i');
                 cout<< "     <Term> -> <Identifier>\n";
             }
+                //T->(E)
 
               else if(prodRule == "(E)")
             { 
@@ -241,6 +277,7 @@ int main()
                 st.push('(');
                 cout<< "        <Term> -> (<Expression>)\n";
             }
+                // T -> number
                else if(prodRule == "n")
             { 
                 st.pop();
@@ -258,12 +295,14 @@ int main()
                 st.push('Y');
                 cout  << "      <Declarative> -> <Type><Identifier><MoreIds>;\n";
             }
+            // Type -> x(int)
             else if(prodRule == "x")
             {
                 st.pop();
                 st.push('x');
                 cout  << "      <Type> -> <int>      \n";
             }
+            // Type -> y(Float)
             else if(prodRule == "y")
             {
                 st.pop();
@@ -271,12 +310,14 @@ int main()
                 cout  << "      <Type> -> <float>      \n";
 
             }
+            //Type -> z(bool)
             else if(prodRule == "z")
             {
                 st.pop();
                 st.push('z');
                 cout  << "      <Type> -> <bool>      \n";
             }
+            // M -> ,idM
             else if(prodRule==",iM")
             {
                 st.pop();
@@ -287,91 +328,76 @@ int main()
                 cout << "          <MoreIds> -> ,<id><MoreIds> \n";
 
             }
-            else if(prodRule=="aCbScSd")
+            //S -> W
+            else if(prodRule=="bE{S}")
             {
                 st.pop();
-                st.push('d');
+                st.push('}');
                 st.push('S');
-                st.push('c');
-                st.push('S');
-                st.push('b');
-                st.push('C');
-                st.push('a');
-
-                cout << "  <Statement >  -> if <Conditional> then <Statement> else <Statement> endif \n";
-
-            }
-             else if(prodRule=="eEfSg")
-            {
-                st.pop();
-                st.push('g');
-                st.push('S');
-                st.push('f');
+                st.push('{');
+                st.push(')');
                 st.push('E');
-                st.push('e');
-                
+                st.push('(');
+                st.push('b');
+               
 
-                cout << "  <Statement >  -> while <Expression> do <Statement> whileend \n";
+                cout << "  <Statement >  -> while <expression> do <Statement> else \n";
 
-
+            
             }
-             else if(prodRule=="hSWj")
+            //S-> I
+            else if(prodRule=="a(C){S}c{S}")
             {
                 st.pop();
-                st.push('j');
-                st.push('W');
+                st.push('}');
                 st.push('S');
-                st.push('h');
+                st.push('{');
+                st.push('c');
+                st.push('}');
+                st.push('S');
+                st.push('{');
+                st.push(')');
+                st.push('C');
+                st.push('(');
+                st.push('a');
+                cout << "  <Statement >  -> IF Statement \n";
 
-                cout << "  <Statement >  -> begin <Statement> <MoreStatements> end\n";
 
 
             }
-
-            else if(prodRule==";SW")
-            {
-                st.pop();
-                st.push('W');
-                st.push('S');
-                st.push(';');
-                
-                cout << "  <More Statements>  -> ; <Statement> <MoreStatements>end\n";
-
-            }
-            else if(prodRule=="ELE")
+            else if (prodRule =="ELE")
             {
                 st.pop();
                 st.push('E');
                 st.push('L');
                 st.push('E');
-                
-                cout << "  <Conditional>  -> <Expression> <Relop> <Expression>\n";
-
-
+                    cout <<"<Conditional> -> <Expression><relop><Expression>\n";
             }
-            else if(prodRule==">")
-            {
-                st.pop();
-                st.push('>');
-                
-                cout << "  <Relop >  -> begin <Statement> <MoreStatements> end\n";
 
-
-            }
-             else if(prodRule=="<")
+            else if (prodRule == "<")
             {
                 st.pop();
                 st.push('<');
-
-                cout << "  <Relop >  -> begin <Statement> <MoreStatements> end\n";
-
+                cout << "<realop> -> < \n";
 
             }
+            else if (prodRule == ">")
+            {
+                st.pop();
+                st.push('>');
 
+                cout << "<realop> -> > \n";
 
+            }
+            
+            // Epsilon Rules
             else if(prodRule == "epsilon" )
             { 
-                
+                if(st.top() == 'S')
+                {
+                    cout << "     <Statement> -> \u03B5 \n"  ;
+
+                }
                 
                 if(st.top() == 'Q')
                 {
@@ -398,13 +424,22 @@ int main()
                         cout << "     <MoreIds> -> \u03B5 \n"  ;
 
                 }
+                if(st.top() == 'Y')
+                {
+                    cout << "     <Type> -> \u03B5 \n"  ;
+
+                }
+
+
+
+                
                 st.pop();
             }
             
 
             else
             {
-                cout << "Error  at line: " << endl;
+                cout << "Error  at line: "<< it->line_found << endl;
                 
                 return 0;
             }
@@ -413,15 +448,21 @@ int main()
           
 
     }
-
         
   if(st.top()== '$' and input.front() == '$')
   {    
     cout << "input parsed correctly  " << endl;
   }
   else 
-  cout << "  \n";
-    
+  {
+      cout << "input parsed incorrectly  " << endl;
+      cout << "Error  at line: "<< it->line_found << endl;
+
+  }
+
+  cout <<"Number of lines: " <<line<< endl;
+
+  
 
 
 
